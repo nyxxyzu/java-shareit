@@ -1,6 +1,6 @@
 package ru.practicum.shareit.user;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.exceptions.ValidationException;
 
@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@Component
-public class InMemoryUserStorage {
+@Repository
+public class InMemoryUserRepository {
 
 	private final Map<Long, User> users = new HashMap<>();
 	private final Set<String> emails = new HashSet<>();
@@ -62,6 +62,7 @@ public class InMemoryUserStorage {
 	}
 
 	public void deleteUser(long userId) {
+		emails.remove(users.get(userId).getEmail());
 		users.remove(userId);
 	}
 }

@@ -24,6 +24,7 @@ import java.util.Collection;
 public class ItemController {
 
 	private final ItemService itemService;
+	private static final String SHARER_USER_ID = "X-Sharer-User-Id";
 
 	@Autowired
 	public ItemController(ItemService itemService) {
@@ -31,7 +32,7 @@ public class ItemController {
 	}
 
 	@PostMapping
-	public ItemDto createItem(@Valid @RequestBody NewItemRequest request, @RequestHeader("X-Sharer-User-Id") long userId) {
+	public ItemDto createItem(@Valid @RequestBody NewItemRequest request, @RequestHeader(SHARER_USER_ID) long userId) {
 		ItemDto createdItem = itemService.createItem(request, userId);
 		log.info("Created item {}", createdItem.toString());
 		return createdItem;
@@ -51,7 +52,7 @@ public class ItemController {
 	}
 
 	@GetMapping
-	public Collection<ItemDto> getAllItemsByOwner(@RequestHeader("X-Sharer-User-Id") long userId) {
+	public Collection<ItemDto> getAllItemsByOwner(@RequestHeader(SHARER_USER_ID) long userId) {
 		return itemService.getAllItemsByOwner(userId);
 	}
 

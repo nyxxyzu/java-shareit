@@ -2,34 +2,38 @@ package ru.practicum.shareit.user;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
 
 import java.util.Collection;
 
 @Service
 public class UserService {
-	private final InMemoryUserStorage userStorage;
+	private final InMemoryUserRepository userStorage;
 
 
 	@Autowired
-	public UserService(InMemoryUserStorage userStorage) {
+	public UserService(InMemoryUserRepository userStorage) {
 		this.userStorage = userStorage;
 
 	}
 
-	public User create(User user) {
-		return userStorage.create(user);
+	public UserDto create(User user) {
+		return UserMapper.mapToUserDto(userStorage.create(user));
 	}
 
-	public User getUserById(long id) {
-		return userStorage.getUserById(id);
+	public UserDto getUserById(long id) {
+		return UserMapper.mapToUserDto(userStorage.getUserById(id));
 	}
 
-	public User update(User user, long userId) {
-		return userStorage.update(user, userId);
+	public UserDto update(User user, long userId) {
+		return UserMapper.mapToUserDto(userStorage.update(user, userId));
 	}
 
-	public Collection<User> getAllUsers() {
-		return userStorage.getAllUsers();
+	public Collection<UserDto> getAllUsers() {
+		return userStorage.getAllUsers().stream()
+				.map(UserMapper::mapToUserDto)
+				.toList();
 	}
 
 	public void deleteUser(long userId) {

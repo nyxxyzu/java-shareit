@@ -8,6 +8,8 @@ import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.dto.NewItemRequest;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.InMemoryUserRepository;
+import ru.practicum.shareit.user.User;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -15,20 +17,27 @@ import java.util.Collections;
 @Service
 public class ItemServiceImpl implements ItemService {
 
-	private final InMemoryItemStorage itemStorage;
+	private final InMemoryItemRepository itemStorage;
+	private final InMemoryUserRepository userStorage;
 
 
 	@Autowired
-	public ItemServiceImpl(InMemoryItemStorage itemStorage) {
+	public ItemServiceImpl(InMemoryItemRepository itemStorage, InMemoryUserRepository userStorage) {
 		this.itemStorage = itemStorage;
+		this.userStorage = userStorage;
 
 	}
 
 	@Override
 	public ItemDto createItem(NewItemRequest request, long userId) {
-		Item item = ItemMapper.mapToItem(request);
-		item = itemStorage.createItem(item, userId);
-		return ItemMapper.toItemDto(item);
+		User user = userStorage.getUserById(userId);
+		if (user != null) {
+			Item item = ItemMapper.mapToItem(request);
+			item = itemStorage.createItem(item);
+			item.setOwner(user);
+			return ItemMapper.toItemDto(item);
+		}
+		throw new NotFoundException("Такого пользователя не существует.");
 	}
 
 	@Override
@@ -44,8 +53,8 @@ public class ItemServiceImpl implements ItemService {
 	public ItemDto updateItem(UpdateItemRequest request, long userId, long itemId) {
 		Item updatedItem = itemStorage.getItemById(itemId);
 		if (updatedItem != null) {
-			ItemMapper.updateItemFields(updatedItem, request);
-			updatedItem = itemStorage.updateItem(updatedItem, itemId, userId);
+			ItemMapper.updateItemFields(updatedItem, request); // проверки на null происходят в updateItemFields
+			updatedItem = itemStorage.updateItem(itemId, userId);
 			return ItemMapper.toItemDto(updatedItem);
 		}
 		throw new NotFoundException("Предмет не найден");
@@ -53,8 +62,7 @@ public class ItemServiceImpl implements ItemService {
 
 	@Override
 	public Collection<ItemDto> getAllItemsByOwner(long userId) {
-		return itemStorage.getAllItems().stream()
-				.filter(item -> item.getOwner().getId() == userId)
+		return itemStorage.getAllItemsByOwner(userId).stream()
 				.map(ItemMapper::toItemDto)
 				.toList();
 	}
