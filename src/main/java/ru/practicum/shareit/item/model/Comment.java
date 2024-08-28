@@ -8,45 +8,41 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.validationgroups.BasicInfo;
 
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
 @Entity
-@Table(name = "items")
-public class Item {
+@Table(name = "comments")
+public class Comment {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	@NotEmpty(groups = BasicInfo.class)
-	@Size(max = 50)
-	private String name;
-	@NotEmpty(groups = BasicInfo.class)
-	@Size(max = 200)
-	private String description;
-	@Column(name = "is_available")
+	private String text;
 	@NotNull(groups = BasicInfo.class)
-	private Boolean available;
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "owner_id")
-	private User owner;
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "request_id")
-	private ItemRequest request;
+	@JoinColumn(name = "item_id")
+	private Item item;
+	@NotNull(groups = BasicInfo.class)
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "author_id")
+	private User author;
+	@Column(name = "date_created")
+	private LocalDateTime created;
+
 
 }
