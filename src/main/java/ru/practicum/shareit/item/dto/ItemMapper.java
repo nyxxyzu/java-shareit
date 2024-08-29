@@ -13,7 +13,6 @@ public class ItemMapper {
 		dto.setName(item.getName());
 		dto.setAvailable(item.getAvailable());
 		dto.setDescription(item.getDescription());
-		dto.setRequest(item.getRequest() != null ? item.getRequest() : null);
 		return dto;
 	}
 

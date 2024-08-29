@@ -43,10 +43,12 @@ public class Booking {
 	@FutureOrPresent
 	@Column(name = "end_date")
 	private LocalDateTime end;
+	@ToString.Exclude
 	@NotEmpty(groups = BasicInfo.class)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "item_id")
 	private Item item;
+	@ToString.Exclude
 	@NotEmpty(groups = BasicInfo.class)
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User booker;

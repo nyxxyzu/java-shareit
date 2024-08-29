@@ -1,14 +1,16 @@
 package ru.practicum.shareit.user;
 
-import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exceptions.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
 
 import java.util.Collection;
 
+@Transactional(readOnly = true)
 @Service
 public class UserServiceImpl implements UserService {
 	private final UserRepository userStorage;

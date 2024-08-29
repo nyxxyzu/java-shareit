@@ -1,8 +1,8 @@
 package ru.practicum.shareit.booking;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
 
 	private final BookingRepository bookingRepository;
@@ -56,9 +57,14 @@ public class BookingServiceImpl implements BookingService {
 	public BookingDto approveBooking(long userId, long bookingId, Boolean approved) {
 		Booking oldBooking = bookingRepository.findById(bookingId)
 				.orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
-
+		if (userRepository.findById(userId).isEmpty()) {
+			throw new NotFoundException("Пользователь не найден");
+		}
 		if (oldBooking.getItem().getOwner().getId() != userId) {
 			throw new ValidationException("Пользователь не является владельцем вещи.");
+		}
+		if (approved == null) {
+			throw new NotFoundException("Не указана опция для подтверждения бронирования");
 		}
 		if (approved) {
 			oldBooking.setStatus(Status.APPROVED);
@@ -85,19 +91,19 @@ public class BookingServiceImpl implements BookingService {
 			throw new NotFoundException("Пользователь не найден");
 		}
 		List<Booking> bookings = new ArrayList<>();
-		if (status.equalsIgnoreCase("all")) {
+		if (status.equalsIgnoreCase(State.ALL.name())) {
 			bookings = bookingRepository.findByBookerId(userId);
 		}
-		if (status.equalsIgnoreCase("future")) {
+		if (status.equalsIgnoreCase(State.FUTURE.name())) {
 			bookings = bookingRepository.findByBookerIdAndStartIsAfter(userId, LocalDateTime.now());
 		}
-		if (status.equalsIgnoreCase("past")) {
+		if (status.equalsIgnoreCase(State.PAST.name())) {
 			bookings = bookingRepository.findByBookerIdAndEndIsBefore(userId, LocalDateTime.now());
 		}
-		if (status.equalsIgnoreCase("current")) {
+		if (status.equalsIgnoreCase(State.CURRENT.name())) {
 			bookings = bookingRepository.findByBookerIdAndEndIsAfter(userId, LocalDateTime.now());
 		}
-		if (status.equalsIgnoreCase("waiting") || status.equalsIgnoreCase("rejected")) {
+		if (status.equalsIgnoreCase(State.WAITING.name()) || status.equalsIgnoreCase(State.REJECTED.name())) {
 			bookings = bookingRepository.findByBookerWithStatus(userId, status);
 		}
 		return bookings.stream()
@@ -113,19 +119,19 @@ public class BookingServiceImpl implements BookingService {
 			throw new NotFoundException("Пользователь не найден");
 		}
 		List<Booking> bookings = new ArrayList<>();
-		if (status.equalsIgnoreCase("all")) {
+		if (status.equalsIgnoreCase(State.ALL.name())) {
 			bookings = bookingRepository.findByOwnerId(userId);
 		}
-		if (status.equalsIgnoreCase("future")) {
+		if (status.equalsIgnoreCase(State.FUTURE.name())) {
 			bookings = bookingRepository.findByOwnerIdAndStartIsAfter(userId, LocalDateTime.now());
 		}
-		if (status.equalsIgnoreCase("past")) {
+		if (status.equalsIgnoreCase(State.PAST.name())) {
 			bookings = bookingRepository.findByOwnerIdAndEndIsBefore(userId, LocalDateTime.now());
 		}
-		if (status.equalsIgnoreCase("current")) {
+		if (status.equalsIgnoreCase(State.CURRENT.name())) {
 			bookings = bookingRepository.findByOwnerIdAndEndIsAfter(userId, LocalDateTime.now());
 		}
-		if (status.equalsIgnoreCase("waiting") || status.equalsIgnoreCase("rejected")) {
+		if (status.equalsIgnoreCase(State.WAITING.name()) || status.equalsIgnoreCase(State.REJECTED.name())) {
 			bookings = bookingRepository.findByOwnerIdWithStatus(userId, status);
 		}
 		return bookings.stream()

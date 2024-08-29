@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.exceptions.NotFoundException;
@@ -21,8 +21,12 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 
+@Transactional(readOnly = true)
 @Service
 public class ItemServiceImpl implements ItemService {
 
@@ -53,11 +57,10 @@ public class ItemServiceImpl implements ItemService {
 
 	@Override
 	public TimestampItemDto getItemById(long itemId) {
-		return itemStorage.findById(itemId)
-				.map(ItemMapper::toTimestampItemDto)
-				.map(item -> addTimestamps(itemId))
-				.map(item -> addComments(itemId))
-				.orElseThrow(() -> new NotFoundException("Предмет не найден"));
+		Item item = itemStorage.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
+		List<Comment> comments = commentStorage.findByItemId(itemId);
+		TimestampItemDto itemDto = ItemMapper.toTimestampItemDto(item);
+		return addComments(itemDto, comments);
 	}
 
 	@Override
@@ -73,11 +76,20 @@ public class ItemServiceImpl implements ItemService {
 
 	@Override
 	public Collection<TimestampItemDto> getAllItemsByOwner(long userId) {
-		List<Item> items = itemStorage.findByOwnerId(userId);
-		return items.stream()
+		Map<Long, Item> itemMap = itemStorage.findByOwnerId(userId)
+				.stream()
+				.collect(Collectors.toMap(Item::getId, Function.identity()));
+		Map<Long, List<Booking>> bookingMap = bookingStorage.findByItemsIds(itemMap.keySet())
+				.stream()
+				.collect(Collectors.groupingBy(booking -> booking.getItem().getId()));
+		Map<Long, List<Comment>> commentMap = commentStorage.findByItemsIds(itemMap.keySet())
+				.stream()
+				.collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+		return itemMap.values()
+				.stream()
 				.map(ItemMapper::toTimestampItemDto)
-				.map(item -> addTimestamps(item.getId()))
-				.map(item -> addComments(item.getId()))
+				.map(item -> addTimestamps(item, bookingMap.getOrDefault(item.getId(), Collections.emptyList())))
+				.map(item -> addComments(item, commentMap.getOrDefault(item.getId(), Collections.emptyList())))
 				.toList();
 	}
 
@@ -91,6 +103,7 @@ public class ItemServiceImpl implements ItemService {
 				.toList();
 	}
 
+	@Transactional
 	@Override
 	public CommentDto createComment(RequestCommentDto dto, long itemId, long userId) {
 		if (bookingStorage.findByUserAndItemId(userId, itemId).isEmpty()) {
@@ -105,9 +118,7 @@ public class ItemServiceImpl implements ItemService {
 		return ItemMapper.toCommentDto(commentStorage.save(comment));
 	}
 
-	public TimestampItemDto addTimestamps(long itemId) {
-		List<Booking> bookings = bookingStorage.findByItemId(itemId);
-		TimestampItemDto itemDto = ItemMapper.toTimestampItemDto(itemStorage.findById(itemId).get());
+	public TimestampItemDto addTimestamps(TimestampItemDto itemDto, List<Booking> bookings) {
 		for (Booking booking : bookings) {
 			if (booking.getStart().isBefore(LocalDateTime.now())
 					&& (itemDto.getLastBooking() == null || itemDto.getLastBooking().isBefore(booking.getStart()))) {
@@ -121,12 +132,10 @@ public class ItemServiceImpl implements ItemService {
 		return itemDto;
 	}
 
-	public TimestampItemDto addComments(long itemId) {
-		List<Comment> comments = commentStorage.findByItemId(itemId);
+	public TimestampItemDto addComments(TimestampItemDto itemDto, List<Comment> comments) {
 		List<CommentDto> commentDtos = comments.stream()
 				.map(ItemMapper::toCommentDto)
 				.toList();
-		TimestampItemDto itemDto = ItemMapper.toTimestampItemDto(itemStorage.findById(itemId).get());
 		itemDto.setComments(commentDtos);
 		return itemDto;
 	}

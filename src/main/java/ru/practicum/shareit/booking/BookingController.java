@@ -55,7 +55,7 @@ public class BookingController {
 
 	@GetMapping
 	public Collection<BookingDto> getBookingsByUser(@RequestHeader(SHARER_USER_ID) long userId,
-													@RequestParam(required = false, defaultValue = "all") String status) {
+													@RequestParam(defaultValue = "all") String status) {
 		return bookingService.getBookingsByUser(userId, status);
 	}
 

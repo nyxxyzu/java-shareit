@@ -2,12 +2,11 @@ package ru.practicum.shareit.booking;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
-@Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
 	List<Booking> findByBookerIdAndEndIsBefore(Long bookerId, LocalDateTime end);
@@ -50,7 +49,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
 	@Query(value = "select b.* from bookings as b" +
 	               " join items as i on b.item_id = i.id" +
-	               " where i.id = ?1", nativeQuery = true)
+	               " where i.id in ?1", nativeQuery = true)
+	List<Booking> findByItemsIds(Set<Long> itemIds);
+
+	@Query(value = "select b.* from bookings as b" +
+			" join items as i on b.item_id = i.id" +
+			" where i.id = ?1", nativeQuery = true)
 	List<Booking> findByItemId(long itemId);
 
 	@Query(value = "select b.* from bookings as b" +

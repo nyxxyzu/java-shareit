@@ -33,10 +33,12 @@ public class Comment {
 	private Long id;
 	@NotEmpty(groups = BasicInfo.class)
 	private String text;
+	@ToString.Exclude
 	@NotNull(groups = BasicInfo.class)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "item_id")
 	private Item item;
+	@ToString.Exclude
 	@NotNull(groups = BasicInfo.class)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "author_id")

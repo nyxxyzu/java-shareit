@@ -42,9 +42,11 @@ public class Item {
 	@Column(name = "is_available")
 	@NotNull(groups = BasicInfo.class)
 	private Boolean available;
+	@ToString.Exclude
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "owner_id")
 	private User owner;
+	@ToString.Exclude
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "request_id")
 	private ItemRequest request;
