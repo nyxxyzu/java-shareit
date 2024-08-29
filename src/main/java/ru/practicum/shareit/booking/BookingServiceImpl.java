@@ -58,7 +58,7 @@ public class BookingServiceImpl implements BookingService {
 		Booking oldBooking = bookingRepository.findById(bookingId)
 				.orElseThrow(() -> new NotFoundException("Бронирование не найдено"));
 		if (userRepository.findById(userId).isEmpty()) {
-			throw new NotFoundException("Пользователь не найден");
+			throw new ValidationException("Пользователь не найден");
 		}
 		if (oldBooking.getItem().getOwner().getId() != userId) {
 			throw new ValidationException("Пользователь не является владельцем вещи.");

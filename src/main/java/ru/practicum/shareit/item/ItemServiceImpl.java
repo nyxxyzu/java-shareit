@@ -106,11 +106,11 @@ public class ItemServiceImpl implements ItemService {
 	@Transactional
 	@Override
 	public CommentDto createComment(RequestCommentDto dto, long itemId, long userId) {
+		Item item = itemStorage.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
+		User user = userStorage.findById(userId).orElseThrow(() -> new NotFoundException(("Пользователь не найден")));
 		if (bookingStorage.findByUserAndItemId(userId, itemId).isEmpty()) {
 			throw new ValidationException("Вы не можете оставить отзыв на эту вещь.");
 		}
-		Item item = itemStorage.findById(itemId).orElseThrow(() -> new NotFoundException("Предмет не найден"));
-		User user = userStorage.findById(userId).orElseThrow(() -> new NotFoundException(("Пользователь не найден")));
 		Comment comment = ItemMapper.toComment(dto);
 		comment.setItem(item);
 		comment.setAuthor(user);

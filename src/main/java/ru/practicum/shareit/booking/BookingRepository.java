@@ -59,6 +59,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
 	@Query(value = "select b.* from bookings as b" +
 	               " join items as i on b.item_id = i.id" +
-	               " where b.booker_id = ?1 and i.id = ?2 and b.end_date < current_timestamp", nativeQuery = true)
+	               " where b.booker_id = ?1 and i.id = ?2 and b.end_date <= current_timestamp", nativeQuery = true)
 	List<Booking> findByUserAndItemId(long userId, long itemId);
 }
