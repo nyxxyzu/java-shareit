@@ -70,8 +70,16 @@ public class ItemServiceImpl implements ItemService {
 		if (oldItem.getOwner().getId() != userId) {
 			throw new NotFoundException("Пользователь не является владельцем вещи");
 		}
-		item.setId(itemId);
-		return ItemMapper.toItemDto(itemStorage.save(item));
+		if (item.getAvailable() != null) {
+			oldItem.setAvailable(item.getAvailable());
+		}
+		if (item.getName() != null) {
+			oldItem.setName(item.getName());
+		}
+		if (item.getDescription() != null) {
+			oldItem.setDescription(item.getDescription());
+		}
+		return ItemMapper.toItemDto(itemStorage.save(oldItem));
 	}
 
 	@Override

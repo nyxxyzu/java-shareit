@@ -38,9 +38,14 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public UserDto update(User user, long userId) {
-		userStorage.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-		user.setId(userId);
-		return UserMapper.mapToUserDto(userStorage.save(user));
+		User oldUser = userStorage.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+		if (user.getName() != null) {
+			oldUser.setName(user.getName());
+		}
+		if (user.getEmail() != null) {
+			oldUser.setEmail(user.getEmail());
+		}
+		return UserMapper.mapToUserDto(userStorage.save(oldUser));
 	}
 
 	@Override
