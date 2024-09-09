@@ -7,10 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.BookingService;
-import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
+import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.RequestItemDto;
@@ -24,6 +23,7 @@ import java.util.Collection;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest
@@ -109,6 +109,14 @@ public class BookingServiceImplTest {
 		Collection<BookingDto> bookings = bookingService.getBookingsForUsersItems(user.getId(), "all");
 		assertThat(bookings.size(), equalTo(1));
 
+	}
+
+	@Test
+	void testCantMakeStartAndEndTheSame() {
+		assertThrows(ValidationException.class, () -> {
+			bookingService.createBooking(makeBookingDto(LocalDateTime.of(2024, 9, 9,15,30),
+					LocalDateTime.of(2024, 9, 9,15,30), item.getId()), user.getId());
+		});
 	}
 
 }

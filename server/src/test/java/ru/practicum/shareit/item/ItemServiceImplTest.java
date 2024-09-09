@@ -7,20 +7,26 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.booking.BookingService;
+import ru.practicum.shareit.booking.dto.RequestBookingDto;
+import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.RequestCommentDto;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.TimestampItemDto;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.RequestUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest
@@ -29,6 +35,7 @@ public class ItemServiceImplTest {
 
 	private final ItemService itemService;
 	private final UserService userService;
+	private final BookingService bookingService;
 	private RequestItemDto dto;
 	private UserDto user;
 	private ItemDto item;
@@ -78,11 +85,11 @@ public class ItemServiceImplTest {
 
 	@Test
 	void testUpdate() {
-		ItemDto updatedItem = itemService.updateItem(makeItemDto(null, "newdesc", null,null),
+		ItemDto updatedItem = itemService.updateItem(makeItemDto("newname", "newdesc", false,null),
 				user.getId(), item.getId());
-		assertThat(updatedItem.getName(), equalTo(item.getName()));
+		assertThat(updatedItem.getName(), equalTo("newname"));
 		assertThat(updatedItem.getDescription(), equalTo("newdesc"));
-		assertThat(updatedItem.getAvailable(), equalTo(item.getAvailable()));
+		assertThat(updatedItem.getAvailable(), equalTo(false));
 		assertThat(updatedItem.getRequest(), equalTo(item.getRequest()));
 
 	}
@@ -97,6 +104,37 @@ public class ItemServiceImplTest {
 	void testSearch() {
 		Collection<ItemDto> items = itemService.searchForItem("Description");
 		assertThat(items.size(), equalTo(1));
+	}
+
+	@Test
+	void testCreateComment() {
+		RequestCommentDto dto = new RequestCommentDto();
+		dto.setText("text");
+		RequestBookingDto bookingDto = new RequestBookingDto();
+		bookingDto.setItemId(item.getId());
+		bookingDto.setStart(LocalDateTime.of(2020,9,9,15,30));
+		bookingDto.setEnd(LocalDateTime.of(2021,9,9,15,30));
+		bookingService.createBooking(bookingDto, user.getId());
+		CommentDto comment = itemService.createComment(dto, item.getId(), user.getId());
+		assertThat(comment.getId(), notNullValue());
+		assertThat(comment.getText(), equalTo(dto.getText()));
+		assertThat(comment.getItem(), notNullValue());
+		assertThat(comment.getCreated(), notNullValue());
+		assertThat(comment.getAuthorName(), equalTo(user.getName()));
+
+
+	}
+
+	@Test
+	void cannotUpdateIfNotOwnerTest() {
+		RequestUserDto newUser = new RequestUserDto();
+		newUser.setEmail("email2@gmail.com");
+		newUser.setName("newname");
+		UserDto user2 = userService.create(newUser);
+		assertThrows(NotFoundException.class, () -> {
+			itemService.updateItem(makeItemDto(null, "newdesc", null,null),
+					user2.getId(), item.getId());
+		});
 	}
 
 }
