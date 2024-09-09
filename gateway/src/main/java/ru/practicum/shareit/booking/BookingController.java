@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.practicum.shareit.validationgroups.BasicInfo;
 
+import static ru.practicum.shareit.MyValues.SHARER_USER_ID;
+
 
 @Controller
 @RequestMapping(path = "/bookings")
@@ -22,7 +24,6 @@ import ru.practicum.shareit.validationgroups.BasicInfo;
 public class BookingController {
 
 	private final BookingClient bookingClient;
-	private static final String SHARER_USER_ID = "X-Sharer-User-Id";
 
 	@PostMapping
 	public ResponseEntity<Object> createBooking(@Validated({BasicInfo.class}) @RequestBody RequestBookingDto booking,

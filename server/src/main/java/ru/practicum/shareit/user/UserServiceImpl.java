@@ -41,10 +41,10 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public UserDto update(RequestUserDto dto, long userId) {
 		User oldUser = userStorage.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
-		if (dto.getName() != null) {
+		if (dto.getName() != null && !dto.getName().isBlank()) {
 			oldUser.setName(dto.getName());
 		}
-		if (dto.getEmail() != null) {
+		if (dto.getEmail() != null && !dto.getEmail().isBlank()) {
 			oldUser.setEmail(dto.getEmail());
 		}
 		return UserMapper.mapToUserDto(userStorage.save(oldUser));

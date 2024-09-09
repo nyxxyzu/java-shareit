@@ -10,7 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import ru.practicum.shareit.validationgroups.AdvancedInfo;
 import ru.practicum.shareit.validationgroups.BasicInfo;
+
+import static ru.practicum.shareit.MyValues.SHARER_USER_ID;
 
 
 @Controller
@@ -19,10 +22,9 @@ import ru.practicum.shareit.validationgroups.BasicInfo;
 public class ItemRequestController {
 
 	private final ItemRequestClient requestClient;
-	private static final String SHARER_USER_ID = "X-Sharer-User-Id";
 
 	@PostMapping
-	public ResponseEntity<Object> create(@Validated({BasicInfo.class}) @RequestBody NewItemRequestDto dto,
+	public ResponseEntity<Object> create(@Validated({BasicInfo.class, AdvancedInfo.class}) @RequestBody NewItemRequestDto dto,
 										 @RequestHeader(SHARER_USER_ID) long userId) {
 		return requestClient.create(dto, userId);
 	}

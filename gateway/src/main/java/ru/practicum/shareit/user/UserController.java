@@ -21,7 +21,6 @@ import ru.practicum.shareit.validationgroups.BasicInfo;
 public class UserController {
 
 	private final UserClient userClient;
-	private static final String SHARER_USER_ID = "X-Sharer-User-Id";
 
 	@GetMapping
 	public ResponseEntity<Object> getAllUsers() {

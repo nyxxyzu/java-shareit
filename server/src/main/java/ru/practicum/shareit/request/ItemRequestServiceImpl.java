@@ -64,7 +64,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 				.toList();
 	}
 
-	public ItemRequestDto addItems(ItemRequestDto dto, List<Item> replies) {
+	private ItemRequestDto addItems(ItemRequestDto dto, List<Item> replies) {
 		List<ItemRequestItemDto> repliesDtos = replies.stream()
 				.map(ItemMapper::toItemRequestItemDto)
 				.toList();

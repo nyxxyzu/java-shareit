@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.practicum.shareit.validationgroups.AdvancedInfo;
 import ru.practicum.shareit.validationgroups.BasicInfo;
+
+import static ru.practicum.shareit.MyValues.SHARER_USER_ID;
 
 
 @Controller
@@ -22,17 +25,16 @@ import ru.practicum.shareit.validationgroups.BasicInfo;
 public class ItemController {
 
 	private final ItemClient itemClient;
-	private static final String SHARER_USER_ID = "X-Sharer-User-Id";
 
 	@PostMapping
-	public ResponseEntity<Object> createItem(@Validated({BasicInfo.class}) @RequestBody RequestItemDto dto,
+	public ResponseEntity<Object> createItem(@Validated({BasicInfo.class, AdvancedInfo.class}) @RequestBody RequestItemDto dto,
 											 @RequestHeader(SHARER_USER_ID) long userId) {
 		return itemClient.createItem(dto, userId);
 	}
 
 	@PatchMapping("/{itemId}")
-	public ResponseEntity<Object> updateItem(@RequestBody RequestItemDto dto, @PathVariable("itemId") long itemId,
-							  @RequestHeader(SHARER_USER_ID) long userId) {
+	public ResponseEntity<Object> updateItem(@Validated({AdvancedInfo.class}) @RequestBody RequestItemDto dto, @PathVariable("itemId") long itemId,
+											 @RequestHeader(SHARER_USER_ID) long userId) {
 		return itemClient.updateItem(dto, itemId, userId);
 	}
 
@@ -53,7 +55,7 @@ public class ItemController {
 
 	@PostMapping("/{itemId}/comment")
 	public ResponseEntity<Object> createComment(@PathVariable("itemId") long itemId,
-									@Validated({BasicInfo.class}) @RequestBody RequestCommentDto dto, @RequestHeader(SHARER_USER_ID) long userId) {
+									@Validated({BasicInfo.class, AdvancedInfo.class}) @RequestBody RequestCommentDto dto, @RequestHeader(SHARER_USER_ID) long userId) {
 		return itemClient.createComment(itemId, dto, userId);
 	}
 }
