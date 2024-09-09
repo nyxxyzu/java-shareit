@@ -16,7 +16,6 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.RequestCommentDto;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.TimestampItemDto;
-import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.RequestUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
