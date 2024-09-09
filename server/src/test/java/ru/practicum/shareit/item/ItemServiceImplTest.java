@@ -10,11 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingService;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
 import ru.practicum.shareit.exceptions.NotFoundException;
+import ru.practicum.shareit.exceptions.ValidationException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.RequestCommentDto;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.TimestampItemDto;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.UserService;
 import ru.practicum.shareit.user.dto.RequestUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -121,6 +123,14 @@ public class ItemServiceImplTest {
 		assertThat(comment.getItem(), notNullValue());
 		assertThat(comment.getCreated(), notNullValue());
 		assertThat(comment.getAuthorName(), equalTo(user.getName()));
+		RequestItemDto newDto = new RequestItemDto();
+		newDto.setName("name3");
+		newDto.setAvailable(true);
+		newDto.setDescription("desc3");
+		ItemDto newItem = itemService.createItem(newDto, user.getId());
+		assertThrows(ValidationException.class, () -> {
+			itemService.createComment(dto, newItem.getId(), user.getId());
+		});
 
 
 	}

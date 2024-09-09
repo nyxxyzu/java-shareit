@@ -44,7 +44,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
 	@Query(value = " select b.* from bookings as b" +
 			" join items as i on b.item_id = i.id " +
-			" where i.owner_id = ?1 and b.status like ?2", nativeQuery = true)
+			" where i.owner_id = ?1 and b.status ilike ?2", nativeQuery = true)
 	List<Booking> findByOwnerIdWithStatus(long ownerId, String status);
 
 	@Query(value = "select b.* from bookings as b" +
